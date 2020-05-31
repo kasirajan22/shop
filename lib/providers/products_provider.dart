@@ -50,7 +50,6 @@ class ProductsProvider with ChangeNotifier {
   Product findById(String id) {
     return _product.firstWhere((element) => element.id == id);
   }
-
   Future<void> fetchAndSetProduct() async {
     const url = 'https://shop-6ebc7.firebaseio.com/prod.json';
     try {
