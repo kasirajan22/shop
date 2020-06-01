@@ -18,11 +18,30 @@ class ProductOverviewScreen extends StatefulWidget {
 
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   bool _sowFilteredproduct = false;
-
+  bool _isInit = true;
+  bool _showLoader = false;
   @override
   void initState() {
-    Provider.of<ProductsProvider>(context, listen: false).fetchAndSetProduct();
+    //Provider.of<ProductsProvider>(context, listen: false).fetchAndSetProduct();
+    // Future.delayed(Duration.zero).then(
+    //     (value) => Provider.of<ProductsProvider>(context).fetchAndSetProduct());
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      setState(() {
+        _showLoader = true;
+      });
+      Provider.of<ProductsProvider>(context).fetchAndSetProduct().then((_) {
+        setState(() {
+          _showLoader = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
   }
 
   @override
@@ -67,7 +86,9 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductGrid(_sowFilteredproduct),
+      body: _showLoader
+          ? Center(child: CircularProgressIndicator())
+          : ProductGrid(_sowFilteredproduct),
     );
   }
 }
