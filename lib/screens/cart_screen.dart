@@ -32,14 +32,7 @@ class CartScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.title,
                     ),
                   ),
-                  FlatButton(
-                    onPressed: () {
-                      Provider.of<Order>(context, listen: false).addOrders(
-                          cart.items.values.toList(), cart.totalAmount);
-                      cart.clearCart();
-                    },
-                    child: Text('Order Now'),
-                  ),
+                  OrderButton(cart: cart),
                   SizedBox(width: 10),
                 ],
               ),
@@ -58,5 +51,40 @@ class CartScreen extends StatelessWidget {
             ),
           ],
         ));
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key key,
+    @required this.cart,
+  }) : super(key: key);
+
+  final Cart cart;
+
+  @override
+  _OrderButtonState createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  bool _showLoader = false;
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      onPressed: widget.cart.totalAmount <= 0
+          ? null
+          : () {
+              setState(() {
+                _showLoader = true;
+              });
+              Provider.of<Order>(context, listen: false).addOrders(
+                  widget.cart.items.values.toList(), widget.cart.totalAmount);
+              setState(() {
+                _showLoader = false;
+              });
+              widget.cart.clearCart();
+            },
+      child: _showLoader ? CircularProgressIndicator() : Text('Order Now'),
+    );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import 'cart.dart';
 
@@ -23,16 +25,64 @@ class Order with ChangeNotifier {
     return [..._orders];
   }
 
-  void addOrders(List<CartItem> cartProducts, double total) {
-    _orders.insert(
-      0,
-      OrderItem(
-        id: DateTime.now().toString(),
-        amount: total,
-        dateTime: DateTime.now(),
-        product: cartProducts,
-      ),      
+  Future<void> getOrder() async {
+    const url = 'https://shop-6ebc7.firebaseio.com/orders.json';
+    final res = await http.get(url);
+    if (res.statusCode == 200) {
+      final List<OrderItem> loadedOrders = [];
+      final decodendRes = json.decode(res.body) as Map<String, dynamic>;
+      decodendRes.forEach((orderId, orderData) {
+        loadedOrders.add(
+          OrderItem(
+            id: orderId,
+            amount: orderData['amount'],
+            dateTime: DateTime.parse(orderData['dateTime']),
+            product: (orderData['product'] as List<dynamic>)
+                .map(
+                  (val) => CartItem(
+                      id: val['id'],
+                      price: val['price'],
+                      quanity: val['quantity'],
+                      title: val['title']),
+                )
+                .toList(),
+          ),
+        );
+        _orders = loadedOrders.reversed.toList();
+        notifyListeners();
+      });
+    }
+  }
+
+  void addOrders(List<CartItem> cartProducts, double total) async {
+    const url = 'https://shop-6ebc7.firebaseio.com/orders.json';
+    final timesamp = DateTime.now();
+    final res = await http.post(
+      url,
+      body: json.encode({
+        'amount': total,
+        'dateTime': timesamp.toIso8601String(),
+        'product': cartProducts
+            .map((cp) => {
+                  'id': cp.id,
+                  'title': cp.title,
+                  'quantity': cp.quanity,
+                  'price': cp.price
+                })
+            .toList()
+      }),
     );
-    notifyListeners();
+    if (res.statusCode == 200) {
+      _orders.insert(
+        0,
+        OrderItem(
+          id: json.decode(res.body)['name'],
+          amount: total,
+          dateTime: DateTime.now(),
+          product: cartProducts,
+        ),
+      );
+      notifyListeners();
+    }
   }
 }

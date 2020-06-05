@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../providers/order.dart';
 import '../providers/order.dart' as ord;
 
 class OrderItem extends StatefulWidget {
@@ -14,6 +16,8 @@ class OrderItem extends StatefulWidget {
 }
 
 class _OrderItemState extends State<OrderItem> {
+
+
   var _isExpanded = false;
   @override
   Widget build(BuildContext context) {
@@ -23,9 +27,8 @@ class _OrderItemState extends State<OrderItem> {
       child: Column(
         children: <Widget>[
           ListTile(
-            title: Text(
-              '${widget.order.amount}',
-            ),
+            title: Text('₹ ${widget.order.amount.toStringAsFixed(0)}',
+                style: Theme.of(context).textTheme.title),
             subtitle: Text(
               DateFormat('dd-MM-yyyy hh:mm').format(widget.order.dateTime),
             ),
@@ -41,7 +44,7 @@ class _OrderItemState extends State<OrderItem> {
           if (_isExpanded)
             Container(
                 padding: EdgeInsets.all(20),
-                height: min(widget.order.product.length * 22.0 + 10, 100),
+                height: min(widget.order.product.length * 40.0 + 10, 100),
                 child: ListView(
                     children: widget.order.product
                         .map(
