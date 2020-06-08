@@ -9,12 +9,13 @@ class UserProductScreen extends StatelessWidget {
   static const routeName = '/user-product';
 
   Future<void> _refreshProd(BuildContext context) async {
-    await Provider.of<ProductsProvider>(context,listen: false).fetchAndSetProduct();
+    await Provider.of<ProductsProvider>(context, listen: false)
+        .fetchAndSetProduct(true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final productData = Provider.of<ProductsProvider>(context);
+    //final productData = Provider.of<ProductsProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Products'),
@@ -30,20 +31,31 @@ class UserProductScreen extends StatelessWidget {
         ],
       ),
       drawer: AppDrawer(),
-      body: RefreshIndicator(
-        onRefresh: () => _refreshProd(context),
-        child: Padding(
-          padding: EdgeInsets.all(10),
-          child: ListView.separated(
-            itemBuilder: (ctx, i) => UserProductItem(
-              id: productData.items[i].id,
-              title: productData.items[i].title,
-              imageUrl: productData.items[i].imageUrl,
-            ),
-            itemCount: productData.items.length,
-            separatorBuilder: (BuildContext context, int index) => Divider(),
-          ),
-        ),
+      body: FutureBuilder(
+        future: _refreshProd(context),
+        builder: (ctx, snapShot) =>
+            snapShot.connectionState == ConnectionState.waiting
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : RefreshIndicator(
+                    onRefresh: () => _refreshProd(context),
+                    child: Consumer<ProductsProvider>(
+                      builder: (ctx, productData, _) => Padding(
+                        padding: EdgeInsets.all(10),
+                        child: ListView.separated(
+                          itemBuilder: (ctx, i) => UserProductItem(
+                            id: productData.items[i].id,
+                            title: productData.items[i].title,
+                            imageUrl: productData.items[i].imageUrl,
+                          ),
+                          itemCount: productData.items.length,
+                          separatorBuilder: (BuildContext context, int index) =>
+                              Divider(),
+                        ),
+                      ),
+                    ),
+                  ),
       ),
     );
   }
