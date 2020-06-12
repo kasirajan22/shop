@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../helper/custom_route.dart';
 
 final ThemeData myTheme = ThemeData(
   primarySwatch: MaterialColor(4290234733, {
@@ -13,6 +14,12 @@ final ThemeData myTheme = ThemeData(
     800: Color(0xff414a1c),
     900: Color(0xff21250e)
   }),
+  pageTransitionsTheme: PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: CustomPageTransitionBuilder(),
+      TargetPlatform.iOS: CustomPageTransitionBuilder(),
+    },
+  ),
   brightness: Brightness.light,
   primaryColor: Color(0xffb7c96d),
   primaryColorBrightness: Brightness.light,
